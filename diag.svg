@@ -1,0 +1,438 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg viewBox="0 0 2560 5172" xmlns="http://www.w3.org/2000/svg" xmlns:inkspace="http://www.inkscape.org/namespaces/inkscape" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs id="defs_block">
+    <filter height="1.504" id="filter_blur" inkspace:collect="always" width="1.1575" x="-0.07875" y="-0.252">
+      <feGaussianBlur id="feGaussianBlur3780" inkspace:collect="always" stdDeviation="4.2" />
+    </filter>
+  </defs>
+  <title>blockdiag</title>
+  <desc>diagram {
+  UserDevices  -&gt; VsimDispatchServiceImpl[label = "dispatchVsim(DispatchVsimReqDTO)"];
+  VsimDispatchServiceImpl -&gt; VsimDispatchServiceImpl[label = "dispatchVsim0(DispatchVsimReqDTO)"];
+  VsimDispatchServiceImpl -&gt; VsimDispatchServiceImpl[label = "checkDispatchVsimParam(DispatchVsimReqDTO)"];
+  VsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "dispatchVsim(DispatchV0,DispatchVsimForOss)"];
+  EngVsimDispatchServiceImpl -&gt; UserDataServiceImpl[label = "getUserByUserCode(UserCode)"];
+  EngVsimDispatchServiceImpl &lt;-- UserDataServiceImpl[label = "User"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//检查用户是否占有卡,是则先释放\n//替换特殊PLMN\n//设置设备配置信息\n//设置网络并过滤非种子卡国家网络\n//替换特殊PLMN"];
+  EngVsimDispatchServiceImpl -&gt; BSS模块[label = "//从BSS获取用户信息\ngetUserInfoFromBSS(DispatchVo,DispatchVsimForOss)"];
+  EngVsimDispatchServiceImpl &lt;-- BSS模块;
+  EngVsimDispatchServiceImpl -&gt; FlowProductServiceImpl[label = "//检查用户是否存在流量产品\ngetFlowProductById(DispatchVo.getUserInfo.getProductId)"];
+  EngVsimDispatchServiceImpl &lt;-- FlowProductServiceImpl[label = "FlowProduct"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//把流量产品的机构id设置写入DispatchVo\n//设备手动选运营商\n//设置plmn列表\n"];
+  EngVsimDispatchServiceImpl -&gt; StorePolicyServiceImpl[label = "//获取分卡策略\ngetStorePolicyById(flowProduct.getPolicyId,dispatchVo.getSeedVsimCountry)"];
+  EngVsimDispatchServiceImpl &lt;-- StorePolicyServiceImpl[label = "StorePolicy"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//把分卡策略写入DispatchVo\nsetStorePolicy(StorePolicy)"];
+  EngVsimDispatchServiceImpl -&gt; VsimPoolServiceImpl[label = "//获取卡池\ngetVsimPoolByPolicyId(flowProduct.getPolicyId,dispatchVo.getSeedVsimCountry)"];
+  EngVsimDispatchServiceImpl &lt;-- VsimPoolServiceImpl[label = "List&lt;VsimPool&gt;"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//把卡池写入DispatchVo\n//把卡池机构写入DispatchVo\n//查找符合使用的网络集\n//记录当前会话换卡记录\n//若策略为本地分卡则设置区位映射码信息\n//设置筛选规则"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[rightnote = "//开始分卡\n//使用私有方法dispatchVsim0"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//尝试分配定向卡\ndispatchBindingVsim(DispatchVo)"];
+  EngVsimDispatchServiceImpl -&gt; ScheduleAffinity[label = "//远程调度分配定向卡\nscheduleBinding(SpecifyVsimBinding)"];
+  ScheduleAffinity -&gt; DispatchServiceImpl[label = "//分配定向卡\ndispatchBinding(bingdingVsimPara)"];
+  ScheduleAffinity &lt;-- DispatchServiceImpl[label = "//返回定向分卡结果\nVsimDispatchResult"];
+  EngVsimDispatchServiceImpl &lt;-- ScheduleAffinity[label = "//返回定向卡结果\nVsimDispatchResult"];
+  EngVsimDispatchServiceImpl --&gt; VsimDispatchServiceImpl [label = "//若成功分配定向卡则\n跳过后续步骤准备返回\nDispatchVsimRespDTO"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//尝试本地分卡，尝试查找可用本地套餐写入dispatchVo"];
+  EngVsimDispatchServiceImpl -&gt; EngVsimDispatchServiceImpl[label = "//设置换卡规则"];
+  EngVsimDispatchServiceImpl -&gt; ScheduleAffinity[label = "//远程调度分配定向卡\nscheduleDispatch(dispatchVo)"];
+	ScheduleAffinity -&gt; DispatchServiceImpl[label = "//若不为VIP则普通分卡\nDispatch(dispatchVo)"];
+	DispatchServiceImpl -&gt; DispatchServiceImpl[label = "//获取绑卡列表\n//区分绑卡列表中的独占和非独占卡"];
+	DispatchServiceImpl -&gt; DispatchServiceImpl[label = "//准备多个不同分卡方法加入List&lt;Dispatch&gt;"];
+	DispatchServiceImpl -&gt; Dispatch [label = "//迭代调用抽象分卡方法dispatch(DispatchVo)"];
+	Dispatch -&gt; Dispatch [label = "//尝试从缓存中分卡\ndispatchVsimFromCache()"];
+	Dispatch -&gt; DispatchServiceImpl[label = "//按当前分卡方法查找可用卡\nfindMatchVsimInfoList(dispatchVo,vsimCondition)"];
+	DispatchServiceImpl -&gt; VsimDataServiceImpl[label = "//\ngetMatchVsimInfos(vsimCondition)"];
+	VsimDataServiceImpl -&gt; DB[label = "getMatchVsimInfos(vsimCondition)"];
+	VsimDataServiceImpl &lt;-- DB[label = "VsimInfos"];
+	DispatchServiceImpl &lt;-- VsimDataServiceImpl[label = "//返回卡列表\nList&lt;VsimInfo&gt;"];
+	Dispatch &lt;-- DispatchServiceImpl[label = "//返回可用卡列表\nList&lt;VsimInfo&gt;"];
+	Dispatch -&gt; DispatchServiceImpl[label = "//在卡列表选最好的卡并占用\nchooseBestAndOccupyVsim(...)"];
+	DispatchServiceImpl -&gt; DispatchServiceImpl[label = "//构建分卡对象列表: \n1:获取预占卡集合\n2:去除集合中的当前被占卡、独占绑定卡\n3:填充卡的网络信息\n4:检查卡所在国是否可用\n5:填充套餐类别设置共享套餐\n6:排除绑定卡盲分卡\n7:检查卡制式是否可用于终端;\n\n//对卡对象列表进行过滤、评分、排序\nList&lt;VsimDispatchObj&gt;"];
+	DispatchServiceImpl -&gt; VsimDataServiceImpl[label = "//按列表依次尝试占用卡，若成功则写入数据库、记录日志\nafterChooseBestVsimList&lt;VsimDispatchObj&gt;"];
+	VsimDataServiceImpl -&gt; DB[label = "updateVsimByCondition(Vsim)"];
+	VsimDataServiceImpl &lt;-- DB[label = "//数据库更新结果\n int"];
+	DispatchServiceImpl &lt;-- VsimDataServiceImpl;
+	Dispatch &lt;-- DispatchServiceImpl[label = "//返回\nVsimDispatchResult"];
+	DispatchServiceImpl &lt;-- Dispatch [label = "//结束当前一轮迭代，若成功找到卡则跳出迭代返回\nVsimDispatchResult"];
+	ScheduleAffinity &lt;-- DispatchServiceImpl[label = "//返回定向分卡结果\nVsimDispatchResult"];
+	ScheduleAffinity -&gt; DispatchServiceImpl[label = "//若为VIP则vip分卡\nvipDispatch(dispatchVo)"];
+	ScheduleAffinity &lt;-- DispatchServiceImpl[label = "//返回分卡结果\nVsimDispatchResult"];
+  EngVsimDispatchServiceImpl &lt;-- ScheduleAffinity[label = "//返回分卡结果\nVsimDispatchResult"]; 
+  VsimDispatchServiceImpl &lt;-- EngVsimDispatchServiceImpl[label = "DispatchVsimRespDTO"]; 
+  UserDevices &lt;-- VsimDispatchServiceImpl[label = "Response&lt;DispatchVsimRespDTO&gt;"];
+}</desc>
+  <rect fill="rgb(0,0,0)" height="4994" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="127" y="156" />
+  <rect fill="rgb(0,0,0)" height="4994" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="319" y="156" />
+  <rect fill="rgb(0,0,0)" height="2682" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="323" y="2419" />
+  <rect fill="rgb(0,0,0)" height="4556" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="511" y="453" />
+  <rect fill="rgb(0,0,0)" height="64" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="703" y="532" />
+  <rect fill="rgb(0,0,0)" height="50" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="895" y="848" />
+  <rect fill="rgb(0,0,0)" height="64" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1087" y="977" />
+  <rect fill="rgb(0,0,0)" height="65" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1279" y="1266" />
+  <rect fill="rgb(0,0,0)" height="64" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1471" y="1532" />
+  <rect fill="rgb(0,0,0)" height="251" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1663" y="2074" />
+  <rect fill="rgb(0,0,0)" height="2244" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1663" y="2698" />
+  <rect fill="rgb(0,0,0)" height="78" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1855" y="2167" />
+  <rect fill="rgb(0,0,0)" height="1924" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1855" y="2778" />
+  <rect fill="rgb(0,0,0)" height="79" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1855" y="4783" />
+  <rect fill="rgb(0,0,0)" height="397" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1859" y="3285" />
+  <rect fill="rgb(0,0,0)" height="754" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="1859" y="3777" />
+  <rect fill="rgb(0,0,0)" height="1552" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="2047" y="3072" />
+  <rect fill="rgb(0,0,0)" height="238" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="2239" y="3364" />
+  <rect fill="rgb(0,0,0)" height="212" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="2239" y="4211" />
+  <rect fill="rgb(0,0,0)" height="65" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="2431" y="3444" />
+  <rect fill="rgb(0,0,0)" height="78" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="8" x="2431" y="4292" />
+  <polygon fill="rgb(0,0,0)" points="627,1869 799,1869 807,1877 807,1897 627,1897 627,1869" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="67" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="259" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="451" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="643" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="835" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1027" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1219" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1411" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1603" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1795" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="1987" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="2179" y="46" />
+  <rect fill="rgb(0,0,0)" height="40" stroke="rgb(0,0,0)" style="filter:url(#filter_blur);opacity:0.7;fill-opacity:1" width="128" x="2371" y="46" />
+  <path d="M 128 80 L 128 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="4994" stroke="rgb(0,0,0)" width="8" x="124" y="150" />
+  <path d="M 320 80 L 320 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="4994" stroke="rgb(0,0,0)" width="8" x="316" y="150" />
+  <rect fill="moccasin" height="2682" stroke="rgb(0,0,0)" width="8" x="320" y="2413" />
+  <path d="M 512 80 L 512 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="4556" stroke="rgb(0,0,0)" width="8" x="508" y="447" />
+  <path d="M 704 80 L 704 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="64" stroke="rgb(0,0,0)" width="8" x="700" y="526" />
+  <path d="M 896 80 L 896 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="50" stroke="rgb(0,0,0)" width="8" x="892" y="842" />
+  <path d="M 1088 80 L 1088 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="64" stroke="rgb(0,0,0)" width="8" x="1084" y="971" />
+  <path d="M 1280 80 L 1280 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="65" stroke="rgb(0,0,0)" width="8" x="1276" y="1260" />
+  <path d="M 1472 80 L 1472 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="64" stroke="rgb(0,0,0)" width="8" x="1468" y="1526" />
+  <path d="M 1664 80 L 1664 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="251" stroke="rgb(0,0,0)" width="8" x="1660" y="2068" />
+  <rect fill="moccasin" height="2244" stroke="rgb(0,0,0)" width="8" x="1660" y="2692" />
+  <path d="M 1856 80 L 1856 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="78" stroke="rgb(0,0,0)" width="8" x="1852" y="2161" />
+  <rect fill="moccasin" height="1924" stroke="rgb(0,0,0)" width="8" x="1852" y="2772" />
+  <rect fill="moccasin" height="79" stroke="rgb(0,0,0)" width="8" x="1852" y="4777" />
+  <rect fill="moccasin" height="397" stroke="rgb(0,0,0)" width="8" x="1856" y="3279" />
+  <rect fill="moccasin" height="754" stroke="rgb(0,0,0)" width="8" x="1856" y="3771" />
+  <path d="M 2048 80 L 2048 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="1552" stroke="rgb(0,0,0)" width="8" x="2044" y="3066" />
+  <path d="M 2240 80 L 2240 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="238" stroke="rgb(0,0,0)" width="8" x="2236" y="3358" />
+  <rect fill="moccasin" height="212" stroke="rgb(0,0,0)" width="8" x="2236" y="4205" />
+  <path d="M 2432 80 L 2432 5160" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="8 4" />
+  <rect fill="moccasin" height="65" stroke="rgb(0,0,0)" width="8" x="2428" y="3438" />
+  <rect fill="moccasin" height="78" stroke="rgb(0,0,0)" width="8" x="2428" y="4286" />
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="64" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="66" x="128.0" y="65">UserDevices</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="256" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="126" x="320.0" y="59">VsimDispatchServiceIm</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="12" x="320.0" y="72">pl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="448" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="126" x="512.0" y="59">EngVsimDispatchServic</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="30" x="512.0" y="72">eImpl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="640" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="704.0" y="66">UserDataServiceImpl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="832" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="40" x="896.0" y="66">BSS模块</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1024" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="126" x="1088.0" y="60">FlowProductServiceImp</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="6" x="1088.0" y="72">l</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1216" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="126" x="1280.0" y="60">StorePolicyServiceImp</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="6" x="1280.0" y="72">l</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1408" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="1472.0" y="66">VsimPoolServiceImpl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1600" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="96" x="1664.0" y="66">ScheduleAffinity</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1792" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="1856.0" y="66">DispatchServiceImpl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="1984" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="48" x="2048.0" y="66">Dispatch</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="2176" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="2240.0" y="66">VsimDataServiceImpl</text>
+  <rect fill="rgb(255,255,255)" height="40" stroke="rgb(0,0,0)" width="128" x="2368" y="40" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="12" x="2432.0" y="65">DB</text>
+  <path d="M 136 150 L 312 150" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="304,146 312,150 304,154" stroke="rgb(0,0,0)" />
+  <path d="M 328 242 L 416 242" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 416 242 L 416 258" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 416 258 L 328 258" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="336,254 328,258 336,262" stroke="rgb(0,0,0)" />
+  <path d="M 328 351 L 416 351" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 416 351 L 416 367" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 416 367 L 328 367" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="336,363 328,367 336,371" stroke="rgb(0,0,0)" />
+  <path d="M 328 447 L 504 447" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="496,443 504,447 496,451" stroke="rgb(0,0,0)" />
+  <path d="M 520 526 L 696 526" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="688,522 696,526 688,530" stroke="rgb(0,0,0)" />
+  <path d="M 520 590 L 696 590" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,586 520,590 528,594" stroke="rgb(0,0,0)" />
+  <path d="M 520 747 L 608 747" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 747 L 608 763" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 763 L 520 763" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,759 520,763 528,767" stroke="rgb(0,0,0)" />
+  <path d="M 520 842 L 888 842" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="880,838 888,842 880,846" stroke="rgb(0,0,0)" />
+  <path d="M 520 892 L 888 892" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,888 520,892 528,896" stroke="rgb(0,0,0)" />
+  <path d="M 520 971 L 1080 971" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1072,967 1080,971 1072,975" stroke="rgb(0,0,0)" />
+  <path d="M 520 1035 L 1080 1035" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,1031 520,1035 528,1039" stroke="rgb(0,0,0)" />
+  <path d="M 520 1165 L 608 1165" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1165 L 608 1181" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1181 L 520 1181" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,1177 520,1181 528,1185" stroke="rgb(0,0,0)" />
+  <path d="M 520 1260 L 1272 1260" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1264,1256 1272,1260 1264,1264" stroke="rgb(0,0,0)" />
+  <path d="M 520 1325 L 1272 1325" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,1321 520,1325 528,1329" stroke="rgb(0,0,0)" />
+  <path d="M 520 1431 L 608 1431" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1431 L 608 1447" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1447 L 520 1447" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,1443 520,1447 528,1451" stroke="rgb(0,0,0)" />
+  <path d="M 520 1526 L 1464 1526" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1456,1522 1464,1526 1456,1530" stroke="rgb(0,0,0)" />
+  <path d="M 520 1590 L 1464 1590" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,1586 520,1590 528,1594" stroke="rgb(0,0,0)" />
+  <path d="M 520 1797 L 608 1797" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1797 L 608 1813" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1813 L 520 1813" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,1809 520,1813 528,1817" stroke="rgb(0,0,0)" />
+  <path d="M 520 1877 L 608 1877" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1877 L 608 1893" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1893 L 520 1893" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,1889 520,1893 528,1897" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(255,182,193)" points="624,1863 796,1863 804,1871 804,1891 624,1891 624,1863" stroke="rgb(0,0,0)" />
+  <path d="M 796 1863 L 796 1871" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 796 1871 L 804 1871" fill="none" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="56" x="660.0" y="1876">//开始分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="156" x="710.0" y="1889">//使用私有方法dispatchVsim0</text>
+  <path d="M 520 1973 L 608 1973" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1973 L 608 1989" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 1989 L 520 1989" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,1985 520,1989 528,1993" stroke="rgb(0,0,0)" />
+  <path d="M 520 2068 L 1656 2068" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1648,2064 1656,2068 1648,2072" stroke="rgb(0,0,0)" />
+  <path d="M 1672 2161 L 1848 2161" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1840,2157 1848,2161 1840,2165" stroke="rgb(0,0,0)" />
+  <path d="M 1672 2239 L 1848 2239" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1680,2235 1672,2239 1680,2243" stroke="rgb(0,0,0)" />
+  <path d="M 520 2319 L 1656 2319" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,2315 520,2319 528,2323" stroke="rgb(0,0,0)" />
+  <path d="M 332 2413 L 504 2413" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="340,2409 332,2413 340,2417" stroke="rgb(0,0,0)" />
+  <path d="M 520 2516 L 608 2516" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 2516 L 608 2532" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 2532 L 520 2532" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,2528 520,2532 528,2536" stroke="rgb(0,0,0)" />
+  <path d="M 520 2597 L 608 2597" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 2597 L 608 2613" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 608 2613 L 520 2613" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="528,2609 520,2613 528,2617" stroke="rgb(0,0,0)" />
+  <path d="M 520 2692 L 1656 2692" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1648,2688 1656,2692 1648,2696" stroke="rgb(0,0,0)" />
+  <path d="M 1672 2772 L 1848 2772" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1840,2768 1848,2772 1840,2776" stroke="rgb(0,0,0)" />
+  <path d="M 1864 2864 L 1952 2864" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 2864 L 1952 2880" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 2880 L 1864 2880" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1872,2876 1864,2880 1872,2884" stroke="rgb(0,0,0)" />
+  <path d="M 1864 2971 L 1952 2971" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 2971 L 1952 2987" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 2987 L 1864 2987" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1872,2983 1864,2987 1872,2991" stroke="rgb(0,0,0)" />
+  <path d="M 1864 3066 L 2040 3066" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2032,3062 2040,3066 2032,3070" stroke="rgb(0,0,0)" />
+  <path d="M 2056 3171 L 2144 3171" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 2144 3171 L 2144 3187" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 2144 3187 L 2056 3187" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2064,3183 2056,3187 2064,3191" stroke="rgb(0,0,0)" />
+  <path d="M 1868 3279 L 2040 3279" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1876,3275 1868,3279 1876,3283" stroke="rgb(0,0,0)" />
+  <path d="M 1868 3358 L 2232 3358" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2224,3354 2232,3358 2224,3362" stroke="rgb(0,0,0)" />
+  <path d="M 2248 3438 L 2424 3438" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2416,3434 2424,3438 2416,3442" stroke="rgb(0,0,0)" />
+  <path d="M 2248 3503 L 2424 3503" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="2256,3499 2248,3503 2256,3507" stroke="rgb(0,0,0)" />
+  <path d="M 1868 3596 L 2232 3596" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1876,3592 1868,3596 1876,3600" stroke="rgb(0,0,0)" />
+  <path d="M 1864 3676 L 2040 3676" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="2032,3672 2040,3676 2032,3680" stroke="rgb(0,0,0)" />
+  <path d="M 1868 3771 L 2040 3771" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1876,3767 1868,3771 1876,3775" stroke="rgb(0,0,0)" />
+  <path d="M 1868 4111 L 1952 4111" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 4111 L 1952 4127" fill="none" stroke="rgb(0,0,0)" />
+  <path d="M 1952 4127 L 1868 4127" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1876,4123 1868,4127 1876,4131" stroke="rgb(0,0,0)" />
+  <path d="M 1868 4205 L 2232 4205" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2224,4201 2232,4205 2224,4209" stroke="rgb(0,0,0)" />
+  <path d="M 2248 4286 L 2424 4286" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="2416,4282 2424,4286 2416,4290" stroke="rgb(0,0,0)" />
+  <path d="M 2248 4364 L 2424 4364" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="2256,4360 2248,4364 2256,4368" stroke="rgb(0,0,0)" />
+  <path d="M 1868 4417 L 2232 4417" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1876,4413 1868,4417 1876,4421" stroke="rgb(0,0,0)" />
+  <path d="M 1864 4525 L 2040 4525" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="2032,4521 2040,4525 2032,4529" stroke="rgb(0,0,0)" />
+  <path d="M 1864 4618 L 2040 4618" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1872,4614 1864,4618 1872,4622" stroke="rgb(0,0,0)" />
+  <path d="M 1672 4696 L 1848 4696" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1680,4692 1672,4696 1680,4700" stroke="rgb(0,0,0)" />
+  <path d="M 1672 4777 L 1848 4777" fill="none" stroke="rgb(0,0,0)" />
+  <polygon fill="rgb(0,0,0)" points="1840,4773 1848,4777 1840,4781" stroke="rgb(0,0,0)" />
+  <path d="M 1672 4856 L 1848 4856" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="1680,4852 1672,4856 1680,4860" stroke="rgb(0,0,0)" />
+  <path d="M 520 4936 L 1656 4936" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="528,4932 520,4936 528,4940" stroke="rgb(0,0,0)" />
+  <path d="M 332 5003 L 504 5003" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="340,4999 332,5003 340,5007" stroke="rgb(0,0,0)" />
+  <path d="M 136 5095 L 312 5095" fill="none" stroke="rgb(0,0,0)" stroke-dasharray="4" />
+  <polygon fill="rgb(0,0,0)" points="144,5091 136,5095 144,5099" stroke="rgb(0,0,0)" />
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="224.0" y="135">dispatchVsim(DispatchVsimReq</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="24" x="152.0" y="148">DTO)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="382.0" y="220">dispatchVsim0(Disp</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="90" x="373.0" y="234">atchVsimReqDTO)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="382.0" y="321">checkDispatchVsimP</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="382.0" y="335">aram(DispatchVsimR</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="36" x="346.0" y="349">eqDTO)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="416.0" y="432">dispatchVsim(DispatchV0,Disp</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="90" x="377.0" y="445">atchVsimForOss)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="162" x="605.0" y="518">getUserByUserCode(UserCode)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="24" x="684.0" y="588">User</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="570.0" y="660">//检查用户是否占有</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="72" x="556.0" y="674">卡,是则先释放</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="80" x="560.0" y="687">//替换特殊PLMN</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="570.0" y="700">//设置设备配置信息</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="570.0" y="713">//设置网络并过滤非</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="77" x="558.5" y="726">种子卡国家网络</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="80" x="560.0" y="739">//替换特殊PLMN</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="107" x="577.5" y="826">//从BSS获取用户信息</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="294" x="671.0" y="840">getUserInfoFromBSS(DispatchVo,DispatchVsimForOss)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="144" x="596.0" y="955">//检查用户是否存在流量产品</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="330" x="689.0" y="969">getFlowProductById(DispatchVo.getUserInfo.getProductId)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="66" x="1047.0" y="1033">FlowProduct</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="106" x="573.0" y="1105">//把流量产品的机构i</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="104" x="572.0" y="1118">d设置写入DispatchV</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="6" x="523.0" y="1130">o</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="570.0" y="1143">//设备手动选运营商</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="80" x="560.0" y="1156">//设置plmn列表</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="563.0" y="1244">//获取分卡策略</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="438" x="743.0" y="1258">getStorePolicyById(flowProduct.getPolicyId,dispatchVo.getSeedVsimCountry)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="66" x="1239.0" y="1323">StorePolicy</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="107" x="573.5" y="1388">//把分卡策略写入Dis</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="42" x="541.0" y="1401">patchVo</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="574.0" y="1415">setStorePolicy(Sto</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="54" x="547.0" y="1429">rePolicy)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="56" x="552.0" y="1510">//获取卡池</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="456" x="752.0" y="1524">getVsimPoolByPolicyId(flowProduct.getPolicyId,dispatchVo.getSeedVsimCountry)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="84" x="1422.0" y="1588">List&lt;VsimPool&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="109" x="574.5" y="1660">//把卡池写入Dispatc</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="18" x="529.0" y="1672">hVo</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="107" x="573.5" y="1685">//把卡池机构写入Dis</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="42" x="541.0" y="1698">patchVo</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="575.5" y="1711">//查找符合使用的网络</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="11" x="525.5" y="1724">集</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="575.5" y="1737">//记录当前会话换卡记</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="11" x="525.5" y="1749">录</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="575.5" y="1762">//若策略为本地分卡则</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="99" x="569.5" y="1776">设置区位映射码信息</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="559.0" y="1789">//设置筛选规则</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="89" x="564.5" y="1944">//尝试分配定向卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="574.0" y="1957">dispatchBindingVsi</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="559.0" y="1971">m(DispatchVo)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="579.5" y="2052">//远程调度分配定向卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="210" x="629.0" y="2066">scheduleBinding(SpecifyVsimBinding)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="67" x="1709.5" y="2132">//分配定向卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="1760.0" y="2146">dispatchBinding(bingdingVsim</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="30" x="1691.0" y="2159">Para)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1798.0" y="2224">//返回定向分卡结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1794.0" y="2237">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="89" x="1611.5" y="2304">//返回定向卡结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1602.0" y="2317">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="448.5" y="2384">//若成功分配定向卡则</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="110" x="449.0" y="2398">跳过后续步骤准备返回</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="447.0" y="2411">DispatchVsimRespDTO</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="570.0" y="2482">//尝试本地分卡，尝</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="99" x="569.5" y="2495">试查找可用本地套餐</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="82" x="561.0" y="2508">写入dispatchVo</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="559.0" y="2595">//设置换卡规则</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="579.5" y="2676">//远程调度分配定向卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="608.0" y="2690">scheduleDispatch(dispatchVo)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="118" x="1735.0" y="2756">//若不为VIP则普通分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="120" x="1736.0" y="2770">Dispatch(dispatchVo)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="1903.0" y="2836">//获取绑卡列表</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1914.0" y="2849">//区分绑卡列表中的</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="77" x="1902.5" y="2862">独占和非独占卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1914.0" y="2943">//准备多个不同分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="104" x="1916.0" y="2957">方法加入List&lt;Dispa</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="24" x="1876.0" y="2969">tch&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="170" x="1953.0" y="3050">//迭代调用抽象分卡方法dispatch</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="72" x="1904.0" y="3064">(DispatchVo)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="2106.0" y="3137">//尝试从缓存中分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="2110.0" y="3150">dispatchVsimFromCa</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="30" x="2071.0" y="3163">che()</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="144" x="1968.0" y="3250">//按当前分卡方法查找可用卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="1956.0" y="3264">findMatchVsimInfoList(dispat</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="1983.0" y="3277">chVo,vsimCondition)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="12" x="1878.0" y="3342">//</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="192" x="1968.0" y="3356">getMatchVsimInfos(vsimCondition)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="2336.0" y="3423">getMatchVsimInfos(vsimCondit</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="24" x="2264.0" y="3436">ion)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="54" x="2397.0" y="3501">VsimInfos</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="67" x="2198.5" y="3582">//返回卡列表</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="84" x="2190.0" y="3594">List&lt;VsimInfo&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="89" x="1912.5" y="3662">//返回可用卡列表</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="84" x="1910.0" y="3674">List&lt;VsimInfo&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="144" x="1968.0" y="3749">//在卡列表选最好的卡并占用</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="1956.0" y="3763">chooseBestAndOccupyVsim(...)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="106" x="1921.0" y="3867">//构建分卡对象列表:</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="89" x="1912.5" y="3880">1:获取预占卡集合</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="1923.5" y="3894">2:去除集合中的当前被</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="88" x="1912.0" y="3907">占卡、独占绑定卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1918.0" y="3920">3:填充卡的网络信息</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="1923.5" y="3933">4:检查卡所在国是否可</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="11" x="1873.5" y="3946">用</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="1923.5" y="3959">5:填充套餐类别设置共</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="33" x="1884.5" y="3972">享套餐</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1918.0" y="3986">6:排除绑定卡盲分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="1923.5" y="3999">7:检查卡制式是否可用</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="39" x="1887.5" y="4012">于终端;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="6" x="1871.0" y="4024"> </text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="111" x="1923.5" y="4037">//对卡对象列表进行过</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="77" x="1906.5" y="4051">滤、评分、排序</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1922.0" y="4064">List&lt;VsimDispatchO</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="18" x="1877.0" y="4077">bj&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="287" x="2015.5" y="4190">//按列表依次尝试占用卡，若成功则写入数据库、记录日志</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="240" x="1992.0" y="4203">afterChooseBestVsimList&lt;VsimDispatchObj&gt;</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="162" x="2333.0" y="4278">updateVsimByCondition(Vsim)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="89" x="2379.5" y="4350">//数据库更新结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="18" x="2415.0" y="4362">int</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="34" x="1885.0" y="4510">//返回</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1922.0" y="4523">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="166" x="1957.0" y="4590">//结束当前一轮迭代，若成功找到</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="88" x="1996.0" y="4603">卡则跳出迭代返回</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1986.0" y="4616">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="100" x="1798.0" y="4681">//返回定向分卡结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1794.0" y="4694">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="103" x="1727.5" y="4761">//若为VIP则vip分卡</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="138" x="1745.0" y="4775">vipDispatch(dispatchVo)</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="1809.0" y="4841">//返回分卡结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1794.0" y="4854">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="78" x="1617.0" y="4921">//返回分卡结果</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="108" x="1602.0" y="4934">VsimDispatchResult</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="114" x="447.0" y="5001">DispatchVsimRespDTO</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="168" x="228.0" y="5081">Response&lt;DispatchVsimRespDTO</text>
+  <text fill="rgb(0,0,0)" font-family="sans-serif" font-size="11" font-style="normal" font-weight="normal" text-anchor="middle" textLength="6" x="309.0" y="5093">&gt;</text>
+</svg>
